@@ -1,86 +1,219 @@
 #include "vector3.hpp"
 
-mpl::math::Vector3::Vector3()
+#include <math.h>
+
+using namespace mpl::math;
+
+Vector3::Vector3()
 {
-	x(0.0);
-	y(0.0);
-	z(0.0);
+	X(0.0);
+	Y(0.0);
+	Z(0.0);
 }
 
-mpl::math::Vector3::Vector3(double initial_xyz)
+Vector3::Vector3(double initial_xyz)
 {
-	x(initial_xyz);
-	y(initial_xyz);
-	z(initial_xyz);
+	X(initial_xyz);
+	Y(initial_xyz);
+	Z(initial_xyz);
 }
 
-mpl::math::Vector3::Vector3(double initial_x, double initial_y, double initial_z)
+Vector3::Vector3(double initial_x, double initial_y, double initial_z)
 {
-	x(initial_x);
-	y(initial_y);
-	z(initial_z);
+	X(initial_x);
+	Y(initial_y);
+	Z(initial_z);
 }
 
-mpl::math::Vector3::~Vector3()
+Vector3::~Vector3()
 {
 }
 
-double mpl::math::Vector3::x() const
+const Vector3& Vector3::operator+() const
+{
+	return *this;
+}
+
+const Vector3 Vector3::operator-() const
+{
+	return { -X(), -Y(), -Z() };
+}
+
+Vector3 mpl::math::operator+(const Vector3 a, const Vector3 b)
+{
+	return { a.X() + b.X(), a.Y() + b.Y(), a.Z() + b.Z() };
+}
+
+Vector3 mpl::math::operator-(const Vector3 a, const Vector3 b)
+{
+	return { a.X() - b.X(), a.Y() - b.Y(), a.Z() - b.Z() };
+}
+
+Vector3 mpl::math::operator*(const Vector3 a, const Vector3 b)
+{
+	return { a.X() * b.X(), a.Y() * b.Y(), a.Z() * b.Z() };
+}
+
+Vector3 mpl::math::operator/(const Vector3 a, const Vector3 b)
+{
+	return { a.X() / b.X(), a.Y() / b.Y(), a.Z() / b.Z() };
+}
+
+double Vector3::operator[](std::size_t index) const
+{
+	return m_memory[index];
+}
+
+double& Vector3::operator[](std::size_t index)
+{
+	return m_memory[index];
+}
+
+Vector3& Vector3::operator+=(const Vector3& other)
+{
+	X(X() + other.X());
+	X(Y() + other.Y());
+	X(Z() + other.Z());
+	return *this;
+}
+
+Vector3& Vector3::operator-=(const Vector3& other)
+{
+	X(X() - other.X());
+	X(Y() - other.Y());
+	X(Z() - other.Z());
+	return *this;
+}
+
+Vector3& Vector3::operator*=(const Vector3& other)
+{
+	X(X() * other.X());
+	X(Y() * other.Y());
+	X(Z() * other.Z());
+	return *this;
+}
+
+Vector3& Vector3::operator/=(const Vector3& other)
+{
+	X(X() / other.X());
+	X(Y() / other.Y());
+	X(Z() / other.Z());
+	return *this;
+}
+
+Vector3& Vector3::operator*=(const double scalar)
+{
+	X(X() * scalar);
+	Y(Y() * scalar);
+	Z(Z() * scalar);
+	return *this;
+}
+
+Vector3& Vector3::operator/=(const double scalar)
+{
+	X(X() / scalar);
+	Y(Y() / scalar);
+	Z(Z() / scalar);
+	return *this;
+}
+
+double Vector3::X() const
 {
 	return m_memory[0];
 }
 
-double mpl::math::Vector3::y() const
+double Vector3::Y() const
 {
 	return m_memory[1];
 }
 
-double mpl::math::Vector3::z() const
+double Vector3::Z() const
 {
 	return m_memory[2];
 }
 
-void mpl::math::Vector3::x(double x)
+void Vector3::X(double x)
 {
 	m_memory[0] = x;
 }
 
-void mpl::math::Vector3::y(double y)
+void Vector3::Y(double y)
 {
 	m_memory[1] = y;
 }
 
-void mpl::math::Vector3::z(double z)
+void Vector3::Z(double z)
 {
 	m_memory[2] = z;
 }
 
-double mpl::math::Vector3::r() const
+double Vector3::R() const
 {
-	return x();
+	return X();
 }
 
-double mpl::math::Vector3::g() const
+double Vector3::G() const
 {
-	return y();
+	return Y();
 }
 
-double mpl::math::Vector3::b() const
+double Vector3::B() const
 {
-	return z();
+	return Z();
 }
 
-void mpl::math::Vector3::r(double r)
+void Vector3::R(double r)
 {
-	x(r);
+	X(r);
 }
 
-void mpl::math::Vector3::g(double g)
+void Vector3::G(double g)
 {
-	y(g);
+	Y(g);
 }
 
-void mpl::math::Vector3::b(double b)
+void Vector3::B(double b)
 {
-	z(b);
+	Z(b);
+}
+
+double Vector3::Length() const
+{
+	return ((X() * X()) + (Y() * Y()) + (Z() * Z()));
+}
+
+double Vector3::LengthSquared() const
+{
+	return sqrt(Length());
+}
+
+void Vector3::Normalize()
+{
+	double magnitude = 1.0 / LengthSquared();
+	X(X() * magnitude);
+	Y(Y() * magnitude);
+	Z(Z() * magnitude);
+}
+
+Vector3 Vector3::Normalized() const
+{
+	double magnitude = 1.0 / LengthSquared();
+	double x = X() * magnitude;
+	double y = Y() * magnitude;
+	double z = Z() * magnitude;
+
+	return { x, y, z };
+}
+
+double Vector3::Dot(const Vector3& other) const
+{
+	return ((X() * other.X()) + (Y() * other.Y()) + (Z() * other.Z()));
+}
+
+Vector3 Vector3::Cross(const Vector3& other) const
+{
+	double cross_x = (Y() * other.Z()) - (Z() * other.Y());
+	double cross_y = (Z() * other.X()) - (X() * other.Z());
+	double cross_z = (X() * other.Y()) - (Y() * other.X());
+	return { cross_x, cross_y, cross_z };
 }

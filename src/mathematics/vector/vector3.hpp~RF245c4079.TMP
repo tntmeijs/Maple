@@ -26,19 +26,7 @@ namespace mpl::math
 		const Vector3& operator+() const;
 
 		/** Negate the vector */
-		const Vector3 operator-() const;
-
-		/** Add a vector to this vector */
-		friend Vector3 operator+(const Vector3 a, const Vector3 b);
-
-		/** Subtract a vector from this vector */
-		friend Vector3 operator-(const Vector3 a, const Vector3 b);
-
-		/** Multiply a vector by this vector */
-		friend Vector3 operator*(const Vector3 a, const Vector3 b);
-
-		/** Divide a vector by this vector */
-		friend Vector3 operator/(const Vector3 a, const Vector3 b);
+		const Vector3& operator-() const;
 
 		/** Access a member by index */
 		double operator[](std::size_t index) const;
@@ -61,6 +49,9 @@ namespace mpl::math
 
 		/** Divide every component by a scalar value */
 		Vector3& operator/=(const double scalar);
+
+		/** Add a vector to this vector */
+
 
 		/** Returns the X component of the vector */
 		double X() const;
@@ -107,14 +98,9 @@ namespace mpl::math
 		/** Turn this vector into a unit vector */
 		void Normalize();
 
-		/** Return a new normalized vector */
-		Vector3 Normalized() const;
-
-		/** Dot product between this vector and the other vector */
-		double Dot(const Vector3& other) const;
-		
-		/** Cross product between this vector and the other vector */
-		Vector3 Cross(const Vector3& other) const;
+	public:
+		/** Turn the specified vector into a unit vector */
+		static Vector3 Normalize(const Vector3& other);
 
 	private:
 		// Holds the X, Y, and Z components
