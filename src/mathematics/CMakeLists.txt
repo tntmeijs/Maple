@@ -1,6 +1,7 @@
 set(MAPLE_MATHEMATICS_SOURCES
     vector/vector3.cpp
-    vector/vector3.hpp)
+    vector/vector3.hpp
+    utility/point_on_unit_sphere.hpp)
 
 add_library(MapleMathematics ${MAPLE_MATHEMATICS_SOURCES})
 target_compile_features(MapleMathematics PUBLIC cxx_std_17)

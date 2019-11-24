@@ -4,6 +4,7 @@
 #include "graphics/ray/ray.hpp"
 #include "graphics/shading/sky_gradient.hpp"
 #include "mathematics/vector/vector3.hpp"
+#include "mathematics/utility/point_on_unit_sphere.hpp"
 
 #include <fstream>
 #include <limits>
@@ -12,25 +13,32 @@
 using namespace mpl::graphics;
 using namespace mpl::math;
 
-Vector3 CalculateColor(const Ray& ray, const HitList& scene)
+std::default_random_engine generator;
+
+Vector3 CalculateColor(const Ray& primary_ray, const HitList& scene, unsigned int current_bounce, unsigned int max_bounces)
 {
 	HitInfo hit_info;
-
-	if (scene.IsHit(ray, hit_info, 0.0, std::numeric_limits<double>::max()))
+	
+	// t_min is 0.001 to get rid of some of the shadow acne, essentially ignoring hits very close to zero
+	if (scene.IsHit(primary_ray, hit_info, 0.001, std::numeric_limits<double>::max()) && current_bounce < max_bounces)
 	{
-		return 0.5 * Vector3(hit_info.normal.X() + 1.0, hit_info.normal.Y() + 1.0, hit_info.normal.Z() + 1.0);
+		++current_bounce;
+		Vector3 secondary_ray_direction = hit_info.position + hit_info.normal + GenerateRandomPointOnUnitSphere(generator);
+
+		// Absorb half the energy on each bounce
+		return 0.5 * CalculateColor(Ray(hit_info.position, secondary_ray_direction - hit_info.position), scene, current_bounce, max_bounces);
 	}
 	else
 	{
-		return SkyGradient(ray);
+		return SkyGradient(primary_ray);
 	}
 }
 
 int main(int argc, char* argv[])
 {
-	unsigned int horizontal_resolution = 400;
-	unsigned int vertical_resolution = 200;
-	unsigned int sample_count = 32;
+	unsigned int horizontal_resolution = 800;
+	unsigned int vertical_resolution = 400;
+	unsigned int per_pixel_sample_count = 16;
 
 	std::ofstream output_file("./output.ppm");
 
@@ -46,8 +54,7 @@ int main(int argc, char* argv[])
 	scene.AddObject(&small_sphere);
 	scene.AddObject(&big_sphere);
 
-	std::default_random_engine random_number_engine;
-	std::uniform_real_distribution<double> random_number_distribution(0.0, 1.0);
+	std::uniform_real_distribution<double> zero_to_one_range(0.0, 1.0);
 
 	for (int j = vertical_resolution - 1; j >= 0; --j)
 	{
@@ -55,17 +62,22 @@ int main(int argc, char* argv[])
 		{
 			Vector3 output_color;
 
-			for (unsigned int s = 0; s < sample_count; ++s)
+			for (unsigned int s = 0; s < per_pixel_sample_count; ++s)
 			{
-				double screen_u = (static_cast<double>(i) + random_number_distribution(random_number_engine)) / static_cast<double>(horizontal_resolution);
-				double screen_v = (static_cast<double>(j) + random_number_distribution(random_number_engine)) / static_cast<double>(vertical_resolution);
+				double screen_u = (static_cast<double>(i) + zero_to_one_range(generator)) / static_cast<double>(horizontal_resolution);
+				double screen_v = (static_cast<double>(j) + zero_to_one_range(generator)) / static_cast<double>(vertical_resolution);
 
 				Ray ray = camera.CreateRay(screen_u, screen_v);
-				output_color += CalculateColor(ray, scene);
+				output_color += CalculateColor(ray, scene, 0, 5);
 			}
 
 			// Anti-aliasing: average all samples
-			output_color /= static_cast<double>(sample_count);
+			output_color /= static_cast<double>(per_pixel_sample_count);
+
+			// Gamma-correction
+			output_color.R(sqrt(output_color.R()));
+			output_color.G(sqrt(output_color.G()));
+			output_color.B(sqrt(output_color.B()));
 
 			unsigned int red_i		= static_cast<int>(255.99f * output_color.R());
 			unsigned int green_i	= static_cast<int>(255.99f * output_color.G());
