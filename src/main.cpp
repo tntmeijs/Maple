@@ -1,5 +1,6 @@
 #include "graphics/intersection/hit_list.hpp"
 #include "graphics/intersection/sphere.hpp"
+#include "graphics/ray/camera.hpp"
 #include "graphics/ray/ray.hpp"
 #include "graphics/shading/sky_gradient.hpp"
 #include "mathematics/vector/vector3.hpp"
@@ -33,10 +34,7 @@ int main(int argc, char* argv[])
 
 	output_file << "P3\n" << horizontal_resolution << " " << vertical_resolution << "\n255\n";
 
-	Vector3 lower_left_corner(-2.0, -1.0, -1.0);
-	Vector3 horizontal(4.0, 0.0, 0.0);
-	Vector3 vertical(0.0, 2.0, 0.0);
-	Vector3 origin;
+	Camera camera;
 
 	HitList scene(2);
 	Sphere small_sphere({ 0.0, 0.0, -1.0 }, 0.5);
@@ -53,7 +51,7 @@ int main(int argc, char* argv[])
 			double screen_u = static_cast<double>(i) / static_cast<double>(horizontal_resolution);
 			double screen_v = static_cast<double>(j) / static_cast<double>(vertical_resolution);
 
-			Ray ray(origin, lower_left_corner + (screen_u * horizontal) + (screen_v * vertical));
+			Ray ray = camera.CreateRay(screen_u, screen_v);
 			Vector3 output_color = CalculateColor(ray, scene);
 
 			unsigned int red_i		= static_cast<int>(255.99f * output_color.R());

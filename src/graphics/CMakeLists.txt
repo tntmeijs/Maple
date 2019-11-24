@@ -1,6 +1,8 @@
 set(MAPLE_GRAPHICS_SOURCES
     ray/ray.cpp
     ray/ray.hpp
+    ray/camera.cpp
+    ray/camera.hpp
     shading/sky_gradient.hpp
     intersection/hitable_object.hpp
     intersection/sphere.cpp
