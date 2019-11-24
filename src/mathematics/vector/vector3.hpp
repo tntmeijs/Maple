@@ -116,6 +116,9 @@ namespace mpl::math
 		/** Cross product between this vector and the other vector */
 		Vector3 Cross(const Vector3& other) const;
 
+		/** Lerp from this vector to the specified vector by step t */
+		Vector3 LerpTo(const Vector3& target, double step);
+
 	private:
 		// Holds the X, Y, and Z components
 		double m_memory[3];
