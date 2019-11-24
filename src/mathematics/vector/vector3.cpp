@@ -217,3 +217,11 @@ Vector3 Vector3::Cross(const Vector3& other) const
 	double cross_z = (X() * other.Y()) - (Y() * other.X());
 	return { cross_x, cross_y, cross_z };
 }
+
+Vector3 Vector3::LerpTo(const Vector3& target, double step)
+{
+	double lerp_x = ((1.0 - step) * X()) + (step * target.X());
+	double lerp_y = ((1.0 - step) * Y()) + (step * target.Y());
+	double lerp_z = ((1.0 - step) * Z()) + (step * target.Z());
+	return { lerp_x, lerp_y, lerp_z };
+}
