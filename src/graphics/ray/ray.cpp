@@ -4,8 +4,8 @@ using namespace mpl::graphics;
 using namespace mpl::math;
 
 mpl::graphics::Ray::Ray() :
-	m_origin({ 0.0, 0.0, 0.0 }),
-	m_direction({ 0.0, 0.0, -1.0 })
+	m_origin(0.0, 0.0, 0.0),
+	m_direction(0.0, 0.0, -1.0)
 {
 }
 
