@@ -37,7 +37,7 @@ bool Sphere::IsHit(const Ray& ray, HitInfo& hit_info, double step_min_distance, 
 		{
 			hit_info.step_distance = step;
 			hit_info.position = ray.PointAt(step);
-			hit_info.normal = (hit_info.position - center);
+			hit_info.normal = (hit_info.position - center).Normalized();
 			return true;
 		}
 

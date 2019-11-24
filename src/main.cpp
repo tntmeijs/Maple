@@ -16,7 +16,6 @@ Vector3 CalculateColor(const Ray& ray, const HitList& scene)
 
 	if (scene.IsHit(ray, hit_info, 0.0, std::numeric_limits<double>::max()))
 	{
-		hit_info.normal.Normalize();
 		return 0.5 * Vector3(hit_info.normal.X() + 1.0, hit_info.normal.Y() + 1.0, hit_info.normal.Z() + 1.0);
 	}
 	else
