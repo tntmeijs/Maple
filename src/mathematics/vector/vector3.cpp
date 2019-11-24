@@ -72,32 +72,32 @@ double& Vector3::operator[](std::size_t index)
 Vector3& Vector3::operator+=(const Vector3& other)
 {
 	X(X() + other.X());
-	X(Y() + other.Y());
-	X(Z() + other.Z());
+	Y(Y() + other.Y());
+	Z(Z() + other.Z());
 	return *this;
 }
 
 Vector3& Vector3::operator-=(const Vector3& other)
 {
 	X(X() - other.X());
-	X(Y() - other.Y());
-	X(Z() - other.Z());
+	Y(Y() - other.Y());
+	Z(Z() - other.Z());
 	return *this;
 }
 
 Vector3& Vector3::operator*=(const Vector3& other)
 {
 	X(X() * other.X());
-	X(Y() * other.Y());
-	X(Z() * other.Z());
+	Y(Y() * other.Y());
+	Z(Z() * other.Z());
 	return *this;
 }
 
 Vector3& Vector3::operator/=(const Vector3& other)
 {
 	X(X() / other.X());
-	X(Y() / other.Y());
-	X(Z() / other.Z());
+	Y(Y() / other.Y());
+	Z(Z() / other.Z());
 	return *this;
 }
 
