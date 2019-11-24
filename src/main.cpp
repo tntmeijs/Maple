@@ -7,7 +7,7 @@
 using namespace mpl::graphics;
 using namespace mpl::math;
 
-bool HitSphere(const Vector3& center, double radius, const Ray& ray)
+double HitSphere(const Vector3& center, double radius, const Ray& ray)
 {
 	Vector3 origin_center = ray.Origin() - center;
 
@@ -17,7 +17,14 @@ bool HitSphere(const Vector3& center, double radius, const Ray& ray)
 	double c = origin_center.Dot(origin_center) - (radius * radius);
 	double d = (b * b) - (4.0 * a * c);
 	
-	return (d > 0.0);
+	if (d < 0.0)
+	{
+		return -1.0;
+	}
+	else
+	{
+		return ((-b -sqrt(d)) / (2.0 * a));
+	}
 }
 
 int main(int argc, char* argv[])
@@ -33,6 +40,8 @@ int main(int argc, char* argv[])
 	Vector3 horizontal(4.0, 0.0, 0.0);
 	Vector3 vertical(0.0, 2.0, 0.0);
 	Vector3 origin;
+	
+	Vector3 sphere_position(0.0, 0.0, -1.0);
 
 	for (int j = vertical_resolution - 1; j >= 0; --j)
 	{
@@ -44,9 +53,14 @@ int main(int argc, char* argv[])
 			Ray ray(origin, lower_left_corner + (screen_u * horizontal) + (screen_v * vertical));
 			Vector3 output_color;
 
-			if (HitSphere({ 0.0, 0.0, -1.0 }, 0.5, ray))
+			double t = HitSphere(sphere_position, 0.5, ray);
+			if (t > 0.0)
 			{
-				output_color.R(1.0);
+				Vector3 normal = ray.PointAt(t) - sphere_position;
+				normal.Normalize();
+				
+				// Convert from (-1, 1) range to (0, 1)
+				output_color = (Vector3(normal.X() + 1.0, normal.Y() + 1.0, normal.Z() + 1.0) * 0.5);
 			}
 			else
 			{
