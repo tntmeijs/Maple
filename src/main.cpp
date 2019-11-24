@@ -7,6 +7,19 @@
 using namespace mpl::graphics;
 using namespace mpl::math;
 
+bool HitSphere(const Vector3& center, double radius, const Ray& ray)
+{
+	Vector3 origin_center = ray.Origin() - center;
+
+	// ABC formula
+	double a = ray.Direction().Dot(ray.Direction());
+	double b = 2.0 * origin_center.Dot(ray.Direction());
+	double c = origin_center.Dot(origin_center) - (radius * radius);
+	double d = (b * b) - (4.0 * a * c);
+	
+	return (d > 0.0);
+}
+
 int main(int argc, char* argv[])
 {
 	unsigned int horizontal_resolution = 200;
@@ -21,8 +34,6 @@ int main(int argc, char* argv[])
 	Vector3 vertical(0.0, 2.0, 0.0);
 	Vector3 origin;
 
-	Vector3 output_color;
-
 	for (int j = vertical_resolution - 1; j >= 0; --j)
 	{
 		for (unsigned int i = 0; i < horizontal_resolution; ++i)
@@ -31,7 +42,16 @@ int main(int argc, char* argv[])
 			double screen_v = static_cast<double>(j) / static_cast<double>(vertical_resolution);
 
 			Ray ray(origin, lower_left_corner + (screen_u * horizontal) + (screen_v * vertical));
-			output_color = SkyGradient(ray);
+			Vector3 output_color;
+
+			if (HitSphere({ 0.0, 0.0, -1.0 }, 0.5, ray))
+			{
+				output_color.R(1.0);
+			}
+			else
+			{
+				output_color = SkyGradient(ray);
+			}
 
 			unsigned int red_i		= static_cast<int>(255.99f * output_color.R());
 			unsigned int green_i	= static_cast<int>(255.99f * output_color.G());
