@@ -1,36 +1,34 @@
+#include "graphics/intersection/hit_list.hpp"
+#include "graphics/intersection/sphere.hpp"
 #include "graphics/ray/ray.hpp"
 #include "graphics/shading/sky_gradient.hpp"
 #include "mathematics/vector/vector3.hpp"
 
 #include <fstream>
+#include <limits>
 
 using namespace mpl::graphics;
 using namespace mpl::math;
 
-double HitSphere(const Vector3& center, double radius, const Ray& ray)
+Vector3 CalculateColor(const Ray& ray, const HitList& scene)
 {
-	Vector3 origin_center = ray.Origin() - center;
+	HitInfo hit_info;
 
-	// ABC formula
-	double a = ray.Direction().Dot(ray.Direction());
-	double b = 2.0 * origin_center.Dot(ray.Direction());
-	double c = origin_center.Dot(origin_center) - (radius * radius);
-	double d = (b * b) - (4.0 * a * c);
-	
-	if (d < 0.0)
+	if (scene.IsHit(ray, hit_info, 0.0, std::numeric_limits<double>::max()))
 	{
-		return -1.0;
+		hit_info.normal.Normalize();
+		return 0.5 * Vector3(hit_info.normal.X() + 1.0, hit_info.normal.Y() + 1.0, hit_info.normal.Z() + 1.0);
 	}
 	else
 	{
-		return ((-b -sqrt(d)) / (2.0 * a));
+		return SkyGradient(ray);
 	}
 }
 
 int main(int argc, char* argv[])
 {
-	unsigned int horizontal_resolution = 200;
-	unsigned int vertical_resolution = 100;
+	unsigned int horizontal_resolution = 400;
+	unsigned int vertical_resolution = 200;
 
 	std::ofstream output_file("./output.ppm");
 
@@ -40,8 +38,14 @@ int main(int argc, char* argv[])
 	Vector3 horizontal(4.0, 0.0, 0.0);
 	Vector3 vertical(0.0, 2.0, 0.0);
 	Vector3 origin;
-	
-	Vector3 sphere_position(0.0, 0.0, -1.0);
+
+	HitList scene(2);
+	Sphere small_sphere({ 0.0, 0.0, -1.0 }, 0.5);
+	Sphere big_sphere({ 0.0, -100.5, -1.0 }, 100.0);
+
+	// Save the objects in the hit list
+	scene.AddObject(&small_sphere);
+	scene.AddObject(&big_sphere);
 
 	for (int j = vertical_resolution - 1; j >= 0; --j)
 	{
@@ -51,21 +55,7 @@ int main(int argc, char* argv[])
 			double screen_v = static_cast<double>(j) / static_cast<double>(vertical_resolution);
 
 			Ray ray(origin, lower_left_corner + (screen_u * horizontal) + (screen_v * vertical));
-			Vector3 output_color;
-
-			double t = HitSphere(sphere_position, 0.5, ray);
-			if (t > 0.0)
-			{
-				Vector3 normal = ray.PointAt(t) - sphere_position;
-				normal.Normalize();
-				
-				// Convert from (-1, 1) range to (0, 1)
-				output_color = (Vector3(normal.X() + 1.0, normal.Y() + 1.0, normal.Z() + 1.0) * 0.5);
-			}
-			else
-			{
-				output_color = SkyGradient(ray);
-			}
+			Vector3 output_color = CalculateColor(ray, scene);
 
 			unsigned int red_i		= static_cast<int>(255.99f * output_color.R());
 			unsigned int green_i	= static_cast<int>(255.99f * output_color.G());
