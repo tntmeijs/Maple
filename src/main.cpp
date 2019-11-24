@@ -1,11 +1,13 @@
 #include "graphics/intersection/hit_list.hpp"
 #include "graphics/intersection/sphere.hpp"
+#include "graphics/ray/camera.hpp"
 #include "graphics/ray/ray.hpp"
 #include "graphics/shading/sky_gradient.hpp"
 #include "mathematics/vector/vector3.hpp"
 
 #include <fstream>
 #include <limits>
+#include <random>
 
 using namespace mpl::graphics;
 using namespace mpl::math;
@@ -28,15 +30,13 @@ int main(int argc, char* argv[])
 {
 	unsigned int horizontal_resolution = 400;
 	unsigned int vertical_resolution = 200;
+	unsigned int sample_count = 32;
 
 	std::ofstream output_file("./output.ppm");
 
 	output_file << "P3\n" << horizontal_resolution << " " << vertical_resolution << "\n255\n";
 
-	Vector3 lower_left_corner(-2.0, -1.0, -1.0);
-	Vector3 horizontal(4.0, 0.0, 0.0);
-	Vector3 vertical(0.0, 2.0, 0.0);
-	Vector3 origin;
+	Camera camera;
 
 	HitList scene(2);
 	Sphere small_sphere({ 0.0, 0.0, -1.0 }, 0.5);
@@ -46,15 +46,26 @@ int main(int argc, char* argv[])
 	scene.AddObject(&small_sphere);
 	scene.AddObject(&big_sphere);
 
+	std::default_random_engine random_number_engine;
+	std::uniform_real_distribution<double> random_number_distribution(0.0, 1.0);
+
 	for (int j = vertical_resolution - 1; j >= 0; --j)
 	{
 		for (unsigned int i = 0; i < horizontal_resolution; ++i)
 		{
-			double screen_u = static_cast<double>(i) / static_cast<double>(horizontal_resolution);
-			double screen_v = static_cast<double>(j) / static_cast<double>(vertical_resolution);
+			Vector3 output_color;
 
-			Ray ray(origin, lower_left_corner + (screen_u * horizontal) + (screen_v * vertical));
-			Vector3 output_color = CalculateColor(ray, scene);
+			for (unsigned int s = 0; s < sample_count; ++s)
+			{
+				double screen_u = (static_cast<double>(i) + random_number_distribution(random_number_engine)) / static_cast<double>(horizontal_resolution);
+				double screen_v = (static_cast<double>(j) + random_number_distribution(random_number_engine)) / static_cast<double>(vertical_resolution);
+
+				Ray ray = camera.CreateRay(screen_u, screen_v);
+				output_color += CalculateColor(ray, scene);
+			}
+
+			// Anti-aliasing: average all samples
+			output_color /= static_cast<double>(sample_count);
 
 			unsigned int red_i		= static_cast<int>(255.99f * output_color.R());
 			unsigned int green_i	= static_cast<int>(255.99f * output_color.G());
