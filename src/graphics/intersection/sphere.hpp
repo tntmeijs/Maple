@@ -6,6 +6,9 @@
 
 namespace mpl::graphics
 {
+	// Forward declaration
+	class Material;
+
 	/**
 	 * Compute ray intersections with spheres
 	 */
@@ -15,12 +18,12 @@ namespace mpl::graphics
 		/**
 		 * Create a new sphere at position (0, 0, 0) with a radius of 1
 		 */
-		Sphere();
+		Sphere(const Material* material);
 
 		/**
 		 * Create a new sphere with a custom position and radius
 		 */
-		Sphere(const math::Vector3& position, double radius);
+		Sphere(const math::Vector3& position, double radius, const Material* const material);
 
 		virtual ~Sphere();
 
@@ -32,6 +35,9 @@ namespace mpl::graphics
 	private:
 		// Position of the sphere measured at the center
 		math::Vector3 m_center;
+
+		// Material assigned to this sphere
+		const Material* m_assigned_material;
 
 		double m_radius;
 	};

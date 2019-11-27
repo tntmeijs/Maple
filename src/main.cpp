@@ -2,36 +2,41 @@
 #include "graphics/intersection/sphere.hpp"
 #include "graphics/ray/camera.hpp"
 #include "graphics/ray/ray.hpp"
+#include "graphics/shading/materials/lambertian.hpp"
+#include "graphics/shading/materials/metallic.hpp"
 #include "graphics/shading/sky_gradient.hpp"
-#include "mathematics/vector/vector3.hpp"
 #include "mathematics/utility/point_on_unit_sphere.hpp"
+#include "mathematics/vector/vector3.hpp"
 
 #include <fstream>
 #include <limits>
-#include <random>
 
 using namespace mpl::graphics;
 using namespace mpl::math;
 
-std::default_random_engine generator;
-
-Vector3 CalculateColor(const Ray& primary_ray, const HitList& scene, unsigned int current_bounce, unsigned int max_bounces)
+Vector3 CalculateColor(const Ray& ray, const HitList& scene, unsigned int current_bounce, unsigned int max_bounces)
 {
 	HitInfo hit_info;
 	
 	// t_min is 0.001 to get rid of some of the shadow acne, essentially ignoring hits very close to zero
-	if (scene.IsHit(primary_ray, hit_info, 0.001, std::numeric_limits<double>::max()) && current_bounce < max_bounces)
+	if (scene.IsHit(ray, hit_info, 0.001, std::numeric_limits<double>::max()))
 	{
-		++current_bounce;
-		Vector3 secondary_ray_direction = hit_info.position + hit_info.normal + GenerateRandomPointOnUnitSphere(generator);
+		Ray scattered_ray;
+		Vector3 attenuation;
 
-		// Absorb half the energy on each bounce
-		return 0.5 * CalculateColor(Ray(hit_info.position, secondary_ray_direction - hit_info.position), scene, current_bounce, max_bounces);
+		// Bounce the ray
+		if (current_bounce++ < max_bounces)
+		{
+			// Scatter the material or simply do nothing if the ray is not going to scatter at all
+			if (hit_info.material->Scatter(ray, hit_info, attenuation, scattered_ray))
+			{
+				return attenuation * CalculateColor(scattered_ray, scene, current_bounce, max_bounces);
+			}
+		}
 	}
-	else
-	{
-		return SkyGradient(primary_ray);
-	}
+	
+	// If the rays did not do anything, return the sky color
+	return SkyGradient(ray);
 }
 
 int main(int argc, char* argv[])
@@ -47,12 +52,20 @@ int main(int argc, char* argv[])
 	Camera camera;
 
 	HitList scene(2);
-	Sphere small_sphere({ 0.0, 0.0, -1.0 }, 0.5);
-	Sphere big_sphere({ 0.0, -100.5, -1.0 }, 100.0);
+	
+	// Lambertian spheres
+	Sphere sphere_0({ 0.0, 0.0, -1.0 }, 0.5,		new LambertianMaterial({ 0.8, 0.3, 0.3 }));
+	Sphere sphere_1({ 0.0, -100.5, -1.0 }, 100.0,	new LambertianMaterial({ 0.8, 0.8, 0.0 }));
+
+	// Metallic spheres
+	Sphere sphere_2({ 1.0, 0.0, -1.0 }, 0.5,		new MetallicMaterial({ 0.8, 0.6, 0.2 }, 0.3));
+	Sphere sphere_3({ -1.0, 0.0, -1.0 }, 0.5,		new MetallicMaterial({ 0.8, 0.8, 0.8 }, 1.0));
 
 	// Save the objects in the hit list
-	scene.AddObject(&small_sphere);
-	scene.AddObject(&big_sphere);
+	scene.AddObject(&sphere_0);
+	scene.AddObject(&sphere_1);
+	scene.AddObject(&sphere_2);
+	scene.AddObject(&sphere_3);
 
 	std::uniform_real_distribution<double> zero_to_one_range(0.0, 1.0);
 
@@ -64,8 +77,8 @@ int main(int argc, char* argv[])
 
 			for (unsigned int s = 0; s < per_pixel_sample_count; ++s)
 			{
-				double screen_u = (static_cast<double>(i) + zero_to_one_range(generator)) / static_cast<double>(horizontal_resolution);
-				double screen_v = (static_cast<double>(j) + zero_to_one_range(generator)) / static_cast<double>(vertical_resolution);
+				double screen_u = (static_cast<double>(i) + zero_to_one_range(MAPLE_DEFAULT_RANDOM_ENGINE)) / static_cast<double>(horizontal_resolution);
+				double screen_v = (static_cast<double>(j) + zero_to_one_range(MAPLE_DEFAULT_RANDOM_ENGINE)) / static_cast<double>(vertical_resolution);
 
 				Ray ray = camera.CreateRay(screen_u, screen_v);
 				output_color += CalculateColor(ray, scene, 0, 5);

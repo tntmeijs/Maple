@@ -6,6 +6,9 @@
 
 namespace mpl::graphics
 {
+	// Forward declaration
+	class Material;
+
 	/**
 	 * Provides basic information about a hit
 	 * - step distance
@@ -17,13 +20,15 @@ namespace mpl::graphics
 		HitInfo() :
 			step_distance(0.0),
 			position(0.0, 0.0, 0.0),
-			normal(0.0, 0.0, 0.0)
+			normal(0.0, 0.0, 0.0),
+			material(nullptr)
 		{
 		}
 
 		double step_distance;
 		math::Vector3 position;
 		math::Vector3 normal;
+		const Material* material;
 	};
 
 	/**
