@@ -1,5 +1,5 @@
-#ifndef MAPLE_MATERIAL_HPP
-#define MAPLE_MATERIAL_HPP
+#ifndef MAPLE_MATERIAL_BASE_HPP
+#define MAPLE_MATERIAL_BASE_HPP
 
 // Forward declarations
 namespace mpl
@@ -30,4 +30,4 @@ namespace mpl::graphics
 	};
 }
 
-#endif //! MAPLE_MATERIAL_HPP
+#endif //! MAPLE_MATERIAL_BASE_HPP

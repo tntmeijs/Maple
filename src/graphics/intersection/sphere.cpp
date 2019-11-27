@@ -5,15 +5,17 @@
 using namespace mpl::graphics;
 using namespace mpl::math;
 
-Sphere::Sphere() :
+mpl::graphics::Sphere::Sphere(const Material* const material) :
 	m_center(0.0, 0.0, 0.0),
+	m_assigned_material(material),
 	m_radius(1.0)
 {
 }
 
-Sphere::Sphere(const Vector3& position, double radius) :
+Sphere::Sphere(const Vector3& position, double radius, const Material* const material) :
 	m_center(position),
-	m_radius(radius)
+	m_radius(radius),
+	m_assigned_material(material)
 {
 }
 
@@ -32,12 +34,13 @@ bool Sphere::IsHit(const Ray& ray, HitInfo& hit_info, double step_min_distance, 
 	double d = (b * b) - (4.0 * a * c);
 
 	// If the ABC formula can be solved for this step, populate the "hit_info" structure
-	auto TryToFillHitInfo = [&hit_info, &ray](const Vector3& center, double step, double step_min_distance, double step_max_distance) {
+	auto TryToFillHitInfo = [&hit_info, &ray, this](const Vector3& center, double step, double step_min_distance, double step_max_distance) {
 		if (step > step_min_distance && step < step_max_distance)
 		{
 			hit_info.step_distance = step;
 			hit_info.position = ray.PointAt(step);
 			hit_info.normal = (hit_info.position - center).Normalized();
+			hit_info.material = this->m_assigned_material;
 			return true;
 		}
 

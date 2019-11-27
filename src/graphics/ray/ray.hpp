@@ -28,6 +28,9 @@ namespace mpl::graphics
 		/** Get a point along the ray's direction */
 		const math::Vector3 PointAt(double distance) const;
 
+		/** Perfectly reflects the ray's direction */
+		math::Vector3 Reflect(const Ray& ray, const math::Vector3& normal) const;
+
 	private:
 		// Start position of the ray
 		math::Vector3 m_origin;

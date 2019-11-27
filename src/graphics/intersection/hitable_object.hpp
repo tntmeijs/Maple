@@ -28,7 +28,7 @@ namespace mpl::graphics
 		double step_distance;
 		math::Vector3 position;
 		math::Vector3 normal;
-		Material* material;
+		const Material* material;
 	};
 
 	/**
