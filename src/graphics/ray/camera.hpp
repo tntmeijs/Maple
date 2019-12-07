@@ -15,7 +15,7 @@ namespace mpl::graphics
 		/**
 		 * Create a new camera
 		 */
-		Camera();
+		Camera(math::Vector3 origin, math::Vector3 target, math::Vector3 world_up, double vertical_fov, double aspect_ratio);
 		~Camera();
 
 		/**
