@@ -6,6 +6,7 @@
 #include "graphics/shading/materials/metallic.hpp"
 #include "graphics/shading/sky_gradient.hpp"
 #include "mathematics/utility/constants.hpp"
+#include "mathematics/utility/indexing.hpp"
 #include "mathematics/utility/point_on_unit_sphere.hpp"
 #include "mathematics/vector/vector3.hpp"
 
@@ -73,20 +74,6 @@ Vector3 CalculateCorrectedGamma(const Vector3 color, double gamma)
 	double corrected_b = pow(color.B(), 1.0 / gamma);
 
 	return { corrected_r, corrected_g, corrected_b };
-}
-
-/**
- * Index a 1D array as a 2D array
- *
- * @param	row		2D index row component
- * @param	column	2D index column component
- * @param	width	width of a single row
- *
- * @return	index into the 1D array
- */
-std::uint32_t Index2DTo1D(std::uint32_t row, std::uint32_t column, std::uint32_t width)
-{
-	return ((row * width) + column);
 }
 
 /**
