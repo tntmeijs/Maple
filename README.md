@@ -14,6 +14,11 @@ Maple is a CPU path-tracer with the sole purpose of rendering amazing pictures.
 4. Run `cmake .. -G <generator name here> -A x64`. (replace the generator name with the name of your IDE)
 5. Compile and run.
 
+# Contributing
+The project is currently in a very early state.
+If you would like to contribute to it, send me a message on [Twitter](https://twitter.com/tntmeijs) to have a chat!
+I would love to hear from you.
+
 # About Maple
 First and foremost, Maple is used to teach me about path-tracing. It is my very first path-tracer.
 The fundamentals are based on "Raytracing in a Weekend" by Peter Shirley, but have been adapted and expanded upon.
