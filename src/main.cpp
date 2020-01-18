@@ -4,7 +4,7 @@
 #include "graphics/ray/ray.hpp"
 #include "graphics/shading/materials/lambertian.hpp"
 #include "graphics/shading/materials/metallic.hpp"
-#include "graphics/shading/sky_gradient.hpp"
+#include "graphics/shading/sky/sky_gradient.hpp"
 #include "mathematics/utility/constants.hpp"
 #include "mathematics/utility/indexing.hpp"
 #include "mathematics/utility/point_on_unit_sphere.hpp"
