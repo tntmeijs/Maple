@@ -1,6 +1,5 @@
 # Maple
 Welcome to the Maple repository!
-Maple is a CPU path-tracer with the sole purpose of rendering amazing pictures.
 
 # Prerequisites
 - CMake 3.15 and up.
