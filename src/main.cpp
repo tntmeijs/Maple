@@ -5,9 +5,11 @@
 #include "graphics/shading/materials/lambertian.hpp"
 #include "graphics/shading/materials/metallic.hpp"
 #include "graphics/shading/sky/sky_gradient.hpp"
+#include "graphics/shading/sky/skysphere/skysphere.hpp"
 #include "mathematics/utility/constants.hpp"
 #include "mathematics/utility/indexing.hpp"
 #include "mathematics/utility/point_on_unit_sphere.hpp"
+#include "mathematics/utility/tools.hpp"
 #include "mathematics/vector/vector3.hpp"
 
 #include <cmath>
@@ -24,6 +26,7 @@ using namespace mpl::math;
  *
  * @param	ray				ray to evaluate
  * @param	scene			scene the ray should check against
+ * @param	skysphere			texture used to sample when a ray does not intersect with geometry
  * @param	current_bounce	how many bounces this ray has performed
  * @param	max_bounces		maximum number of times this ray can bounce around
  *
@@ -32,6 +35,7 @@ using namespace mpl::math;
 Vector3 CalculateColor(
 	const Ray& ray,
 	const HitList& scene,
+	const SkySphere& skysphere,
 	std::uint32_t current_bounce,
 	std::uint32_t max_bounces)
 {
@@ -49,14 +53,13 @@ Vector3 CalculateColor(
 			// Scatter the material or simply do nothing if the ray is not going to scatter at all
 			if (hit_info.material->Scatter(ray, hit_info, attenuation, scattered_ray))
 			{
-				return attenuation * CalculateColor(scattered_ray, scene, current_bounce, max_bounces);
+				return attenuation * CalculateColor(scattered_ray, scene, skysphere, current_bounce, max_bounces);
 			}
 		}
 	}
 	
-	//#TODO: Sky sphere
 	// If the rays did not do anything, return the sky color
-	return SkyGradient(ray);
+	return skysphere.Sample(ray.Direction());
 }
 
 /**
@@ -82,6 +85,7 @@ Vector3 CalculateCorrectedGamma(const Vector3 color, double gamma)
  *
  * @param	scene				scene to render
  * @param	camera				camera used to render the scene
+ * @param	skysphere			texture used to sample when a ray does not intersect with geometry
  * @param	start_x				horizontal pixel position to start rendering from
  * @param	start_y				vertical pixel position to start rendering from
  * @param	end_x				horizontal pixel position to stop rendering at
@@ -97,6 +101,7 @@ Vector3 CalculateCorrectedGamma(const Vector3 color, double gamma)
 std::vector<Vector3> TraceRays(
 	const HitList& scene,
 	const Camera& camera,
+	const SkySphere& skysphere,
 	std::uint32_t start_x,
 	std::uint32_t start_y,
 	std::uint32_t end_x,
@@ -124,7 +129,7 @@ std::vector<Vector3> TraceRays(
 				double screen_v = (static_cast<double>(j) + range(MAPLE_DEFAULT_RANDOM_ENGINE)) / static_cast<double>(output_size_y);
 
 				Ray ray = camera.CreateRay(screen_u, screen_v);
-				output_color += CalculateColor(ray, scene, 0, 5);
+				output_color += CalculateColor(ray, scene, skysphere, 0, 5);
 			}
 
 			// Anti-aliasing: average all samples
@@ -173,6 +178,10 @@ void WritePixelsToPPM(
 			std::uint32_t green_255 = static_cast<int>(255.99f * pixel.G());
 			std::uint32_t blue_255 = static_cast<int>(255.99f * pixel.B());
 
+			red_255		= Clamp<std::uint32_t>(red_255,		0, 255);
+			green_255	= Clamp<std::uint32_t>(green_255,	0, 255);
+			blue_255	= Clamp<std::uint32_t>(blue_255,	0, 255);
+
 			// Write to the PPM file
 			output_file << red_255 << " " << green_255 << " " << blue_255 << "\n";
 		}
@@ -181,25 +190,28 @@ void WritePixelsToPPM(
 
 int main(int argc, char* argv[])
 {
-	constexpr std::uint32_t horizontal_resolution = 800;
-	constexpr std::uint32_t vertical_resolution = 400;
-	constexpr std::uint32_t per_pixel_sample_count = 16;
-	constexpr std::uint32_t ray_bounce_count = 5;
+	constexpr std::uint32_t horizontal_resolution = 1280;
+	constexpr std::uint32_t vertical_resolution = 720;
+	constexpr std::uint32_t per_pixel_sample_count = 8;
+	constexpr std::uint32_t ray_bounce_count = 4;
 	constexpr double vertical_fov_degrees = 45.0;
 	constexpr double aspect_ratio = static_cast<double>(horizontal_resolution) / static_cast<double>(vertical_resolution);
 	constexpr double gamma = 2.2;
 
-	Camera camera({ -2.0, 2.0, 1.0 }, { 0.0, 0.0, -1.0 }, { 0.0, 1.0, 0.0 }, vertical_fov_degrees, aspect_ratio);
+	SkySphere skysphere;
+	skysphere.Create("resources/skyspheres/mealie_road_8k.hdr");
+
+	Camera camera({ 2.0, 1.0, 1.0 }, { 0.0, 0.0, -1.0 }, { 0.0, 1.0, 0.0 }, vertical_fov_degrees, aspect_ratio);
 
 	HitList scene(4);
 	
 	// Lambertian sphere
-	Sphere sphere_0({ 0.0, 0.0, -1.0 }, 0.5, new LambertianMaterial({ 0.8, 0.3, 0.3 }));
-	Sphere sphere_1({ 0.0, -100.5, -1.0 }, 100.0, new LambertianMaterial({ 0.8, 0.8, 0.0 }));
+	Sphere sphere_0({ 0.0, -100.5, -1.0 }, 100.0, new LambertianMaterial({ 0.8, 0.3, 0.3 }));
 
 	// Metallic sphere
-	Sphere sphere_2({ 1.0, 0.0, -1.0 }, 0.5, new MetallicMaterial({ 0.8, 0.6, 0.2 }, 0.3));
-	Sphere sphere_3({ -1.0, 0.0, -1.0 }, 0.5, new MetallicMaterial({ 0.8, 0.8, 0.8 }, 1.0));
+	Sphere sphere_1({ 0.0, 0.35, -1.0 }, 0.5, new MetallicMaterial({ 0.8, 0.6, 0.2 }, 0.0));
+	Sphere sphere_2({ -1.0, 0.2, -1.0 }, 0.5, new MetallicMaterial({ 1.0, 0.1, 1.0 }, 0.25));
+	Sphere sphere_3({  1.0, 0.5, -1.0 }, 0.5, new MetallicMaterial({ 0.4, 0.8, 0.2 }, 0.5));
 
 	// Save the objects in the hit list
 	scene.AddObject(&sphere_0);
@@ -211,6 +223,7 @@ int main(int argc, char* argv[])
 	std::vector<Vector3> raw_image_data = TraceRays(
 		scene,
 		camera,
+		skysphere,
 		0,
 		0,
 		horizontal_resolution,

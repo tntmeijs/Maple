@@ -1,0 +1,6 @@
+# Credits
+I'd like to thank all the amazing people on the internet that provide resources free of charge!
+Below you'll find a list of all resources used in this project.
+---
+### HDRIs
+- [Mealie Road](https://hdrihaven.com/hdri/?c=skies&h=mealie_road) by Greg Zaal

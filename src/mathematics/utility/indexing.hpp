@@ -12,9 +12,9 @@ namespace mpl::math
 	 *
 	 * @return	index into the 1D array
 	 */
-	std::uint32_t Index2DTo1D(std::uint32_t row, std::uint32_t column, std::uint32_t width)
+	inline std::uint64_t Index2DTo1D(std::uint32_t row, std::uint32_t column, std::uint32_t width)
 	{
-		return ((row * width) + column);
+		return ((static_cast<std::uint64_t>(row) * static_cast<std::uint64_t>(width)) + static_cast<std::uint64_t>(column));
 	}
 }
 
