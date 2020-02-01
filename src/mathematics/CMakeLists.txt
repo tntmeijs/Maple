@@ -4,7 +4,8 @@ set(MAPLE_MATHEMATICS_SOURCES
     utility/point_on_unit_sphere.hpp
     utility/constants.hpp
     utility/literals.hpp
-    utility/indexing.hpp)
+    utility/indexing.hpp
+    utility/tools.hpp)
 
 add_library(MapleMathematics ${MAPLE_MATHEMATICS_SOURCES})
 target_compile_features(MapleMathematics PUBLIC cxx_std_17)

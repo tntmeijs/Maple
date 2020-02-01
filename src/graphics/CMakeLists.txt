@@ -3,10 +3,12 @@ set(MAPLE_GRAPHICS_SOURCES
     ray/ray.hpp
     ray/camera.cpp
     ray/camera.hpp
-    shading/sky_gradient.hpp
     shading/materials/material.hpp
     shading/materials/lambertian.hpp
     shading/materials/metallic.hpp
+    shading/sky/sky_gradient.hpp
+    shading/sky/skysphere/skysphere.cpp
+    shading/sky/skysphere/skysphere.hpp
     intersection/hitable_object.hpp
     intersection/sphere.cpp
     intersection/sphere.hpp

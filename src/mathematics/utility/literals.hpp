@@ -1,7 +1,7 @@
 #ifndef MAPLE_LITERALS_HPP
 #define MAPLE_LITERALS_HPP
 
-#include "utility/constants.hpp"
+#include "constants.hpp"
 
 namespace mpl::math
 {
